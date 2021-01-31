@@ -3,7 +3,7 @@ import cheerio from "cheerio";
 import open from "open";
 import { setInterval } from "timers";
 
-const openAvailableBestBuyItems = async () => {
+const addAvailableBestBuyItemsToCart = async () => {
     const date = new Date();
     console.log(`Checking bestbuy items ${date.toLocaleTimeString("en-US")} ${date.toLocaleDateString("en-US")}`);
     try {
@@ -14,13 +14,13 @@ const openAvailableBestBuyItems = async () => {
         const instockItems = $(".sku-item")
             .toArray()
             .filter(node => $(node).find(".add-to-cart-button:not(.btn-disabled)").length);
-        instockItems.forEach((item) => open(`https://www.bestbuy.com${$(item).find("a").attr("href")}`));
+        instockItems.forEach((item) => open(`https://api.bestbuy.com/click/-/${$(item).attr('data-sku-id')}/cart`));
     } catch (e) {
         console.error(e);
     }
 }
 
-const openAvailableNewEggItems = async () => {
+const addAvailableNewEggItemsToCart = async () => {
     const date = new Date();
     console.log(`Checking newegg items ${date.toLocaleTimeString("en-US")} ${date.toLocaleDateString("en-US")}`);
     try {
@@ -29,14 +29,17 @@ const openAvailableNewEggItems = async () => {
         const instockItems = $(".item-cell")
             .toArray()
             .filter(node => $(node).find(".btn-primary").length);
-        instockItems.forEach((item) => open(`${$(item).find("a").attr("href")}`));
+        instockItems.forEach((item) => {
+            const id = $(item).find('.item-features li:nth-last-child(2)').text().split(': ')[1];
+            open(`https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=${id}`);
+        });
     } catch (e) {
         console.error(e);
     }
 }
 
-openAvailableBestBuyItems();
-setInterval(openAvailableBestBuyItems, 120_000);
+addAvailableBestBuyItemsToCart();
+setInterval(addAvailableBestBuyItemsToCart, 120_000);
 
-openAvailableNewEggItems();
-setInterval(openAvailableNewEggItems, 120_000);
+addAvailableNewEggItemsToCart();
+setInterval(addAvailableNewEggItemsToCart, 120_000);
