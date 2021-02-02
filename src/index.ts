@@ -39,7 +39,7 @@ const addAvailableNewEggItemsToCart = async () => {
 }
 
 addAvailableBestBuyItemsToCart();
-setInterval(addAvailableBestBuyItemsToCart, 120_000);
+setInterval(addAvailableBestBuyItemsToCart, 10_000);
 
 addAvailableNewEggItemsToCart();
-setInterval(addAvailableNewEggItemsToCart, 120_000);
+setInterval(addAvailableNewEggItemsToCart, 10_000);
