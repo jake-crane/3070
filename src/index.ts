@@ -1,23 +1,18 @@
-import axios from "axios";
-import cheerio from "cheerio";
-import open from "open";
-import { setInterval } from "timers";
+import axios, { AxiosRequestConfig } from 'axios';
+import cheerio from 'cheerio';
+import open from 'open';
+import { addAvailableBestBuyItemsToCart } from './best-buy';
+import { newEggItemInStockDomCheck, newEggLinks } from './new-egg';
 
-const addAvailableBestBuyItemsToCart = async () => {
+const checkItem = async (url: string, checkDom: ($: any) => boolean, axiosConfig: AxiosRequestConfig | undefined) => {
     const date = new Date();
-    console.log(`Checking bestbuy items ${date.toLocaleTimeString("en-US")} ${date.toLocaleDateString("en-US")}`);
+    console.log(`[${date.toLocaleTimeString('en-US')} ${date.toLocaleDateString('en-US')}] Checking item ${url}`);
     try {
-        const resp = await axios.get(
-            "https://www.bestbuy.com/site/searchpage.jsp?_dyncharset=UTF-8&id=pcat17071&iht=y&keys=keys&ks=960&list=n&qp=category_facet%3DGPUs%20%2F%20Video%20Graphics%20Cards~abcat0507002&sc=Global&st=3070%20rtx&type=page&usc=All%20Categories"
-        );
+        const resp = await axios.get(url, axiosConfig);
         if (resp.status === 200) {
-            const $ = cheerio.load(resp.data);
-            const instockItems = $(".sku-item")
-                .toArray()
-                .filter(node => $(node).find(".add-to-cart-button:not(.btn-disabled)").length);
-            if (instockItems.length > 0) {
-                console.log('bestbuy item found');
-                instockItems.forEach((item) => open(`https://api.bestbuy.com/click/-/${$(item).attr('data-sku-id')}/cart`));
+            if (checkDom(cheerio.load(resp.data))) {
+                console.log(`item in stock: ${url}`);
+                open(url);
             }
         } else {
             console.log(resp);
@@ -25,35 +20,16 @@ const addAvailableBestBuyItemsToCart = async () => {
     } catch (e) {
         console.error(e);
     }
-}
+};
 
-const addAvailableNewEggItemsToCart = async () => {
-    const date = new Date();
-    console.log(`Checking newegg items ${date.toLocaleTimeString("en-US")} ${date.toLocaleDateString("en-US")}`);
-    try {
-        const resp = await axios.get("https://www.newegg.com/p/pl?d=rtx+3070&N=100006662&LeftPriceRange=0+720");
-        if (resp.status === 200) {
-            const $ = cheerio.load(resp.data);
-            const instockItems = $(".item-cell")
-                .toArray()
-                .filter(node => $(node).find(".btn-primary").length);
-            if (instockItems.length > 0) {
-                console.log('newegg item found');
-                instockItems.forEach((item) => {
-                    const id = $(item).find('.item-features li:nth-last-child(2)').text().split(': ')[1];
-                    open(`https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=${id}`);
-                });
-            }
-        } else {
-            console.log(resp);
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
+const loop = async (index: number, links: string[], checkDom: ($: any) => boolean, axiosConfig: AxiosRequestConfig | undefined = undefined) => {
+    await checkItem(links[index], checkDom, axiosConfig);
+    const nextIndex = index + 1 >= links.length ? 0 : index + 1;
+    setTimeout(() => loop(nextIndex, links, checkDom, axiosConfig), 10_000);
+};
+
+loop(0, newEggLinks, newEggItemInStockDomCheck);
 
 addAvailableBestBuyItemsToCart();
 setInterval(addAvailableBestBuyItemsToCart, 10_000);
 
-addAvailableNewEggItemsToCart();
-setInterval(addAvailableNewEggItemsToCart, 10_000);
