@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build:live",
+    "start:fiddler": "cross-env https_proxy=http://127.0.0.1:8888 http_proxy=http://127.0.0.1:8888 NODE_TLS_REJECT_UNAUTHORIZED=0 npm start",
     "build": "tsc -p .",
     "build:live": "nodemon -e ts --watch src --exec \"ts-node src/index.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
