@@ -3,6 +3,7 @@ import cheerio from 'cheerio';
 import open from 'open';
 import { addAvailableBestBuyItemsToCart } from './best-buy';
 import { newEggItemInStockDomCheck, newEggLinks } from './new-egg';
+import { playNotificationSound } from './play-notification-sound';
 
 const checkItem = async (url: string, checkDom: ($: any) => boolean, axiosConfig: AxiosRequestConfig | undefined) => {
     const date = new Date();
@@ -13,6 +14,7 @@ const checkItem = async (url: string, checkDom: ($: any) => boolean, axiosConfig
             if (checkDom(cheerio.load(resp.data))) {
                 console.log(`item in stock: ${url}`);
                 open(url);
+                playNotificationSound();
             }
         } else {
             console.log(resp);
@@ -32,4 +34,3 @@ loop(0, newEggLinks, newEggItemInStockDomCheck);
 
 addAvailableBestBuyItemsToCart();
 setInterval(addAvailableBestBuyItemsToCart, 10_000);
-

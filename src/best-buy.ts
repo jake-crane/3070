@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import cheerio from 'cheerio';
+import { playNotificationSound } from './play-notification-sound';
 
 export const addAvailableBestBuyItemsToCart = async () => {
     const date = new Date();
@@ -16,6 +17,7 @@ export const addAvailableBestBuyItemsToCart = async () => {
             if (instockItems.length > 0) {
                 console.log('bestbuy item found');
                 instockItems.forEach((item) => open(`https://api.bestbuy.com/click/-/${$(item).attr('data-sku-id')}/cart`));
+                playNotificationSound();
             }
         } else {
             console.log(resp);

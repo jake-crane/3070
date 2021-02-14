@@ -22,6 +22,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.5",
-    "open": "^7.3.1"
+    "open": "^7.3.1",
+    "sound-play": "^1.1.0"
   }
 }
