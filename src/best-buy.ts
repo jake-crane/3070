@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import cheerio from 'cheerio';
 import { playNotificationSound } from './play-notification-sound';
+import open from 'open';
 
 export const addAvailableBestBuyItemsToCart = async () => {
     const date = new Date();
